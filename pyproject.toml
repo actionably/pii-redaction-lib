@@ -1,0 +1,50 @@
+[project]
+name = "pii-redaction-lib"
+version = "0.1.0"
+description = "Library for PII detection and redaction"
+readme = "README.md"
+requires-python = "==3.12.*"
+dependencies = [
+    "pandas>=3.0.1",
+    "openpyxl>=3.1",
+    "presidio-structured>=0.0.6",
+    "presidio-analyzer>=0.95",
+    "faker>=0.9.3",
+    "numpy==1.26.4",
+    "spacy",
+    "en-core-web-lg",
+    "uvicorn==0.35.0",
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "moto>=5.0.0",
+]
+
+[dependency-groups]
+test = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "moto[dynamodb]>=5.0.0",
+]
+
+[tool.uv.sources]
+"en-core-web-lg" = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl" }
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/test/*",
+    "*/__pycache__/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
