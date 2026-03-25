@@ -194,9 +194,14 @@ def main():
 
     args = parser.parse_args()
     if args.filepath.lower().endswith(".csv"):
-        df = pd.read_csv(args.filepath)
+        try:
+            df = pd.read_csv(args.filepath, encoding='utf-8-sig').fillna("")
+        except:
+            df = pd.read_csv(args.filepath, encoding='latin1').fillna("")
+
     else:
-        df = pd.read_excel(args.filepath, sheet_name=args.sheet)
+        df = pd.read_excel(args.filepath, sheet_name=args.sheet).fillna("")
+
 
     # Normalise column names: strip leading/trailing whitespace so that headers
     # with incidental spaces (" first_name ") match user-supplied field names.
