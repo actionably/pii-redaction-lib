@@ -31,6 +31,10 @@ from presidio_anonymizer import AnonymizerEngine
 from presidio_analyzer import AnalyzerEngine
 from faker import Faker
 
+ENTITIES_TO_DETECT = [
+    "PERSON", "EMAIL_ADDRESS", "CREDIT_CARD", "CRYPTO",
+    "IP_ADDRESS", "MAC_ADDRESS", "PHONE_NUMBER", "MEDICAL_LICENSE",
+]
 
 def scrub_text_field(df: pd.DataFrame, field_name: str) -> pd.DataFrame:
     """Redact PII from a single free-form text column using row-by-row NLP analysis.
@@ -63,7 +67,6 @@ def scrub_text_field(df: pd.DataFrame, field_name: str) -> pd.DataFrame:
         "EMAIL_ADDRESS": OperatorConfig("custom", {"lambda": lambda x: fake.safe_email()}),
         "CREDIT_CARD": OperatorConfig("custom", {"lambda": lambda x: fake.credit_card_number()}),
         "CRYPTO": OperatorConfig("replace", {"new_value": "REDACTED"}),
-        "DATE_TIME": OperatorConfig("replace", {"new_value": "REDACTED"}),
         "IP_ADDRESS": OperatorConfig("replace", {"new_value": "REDACTED"}),
         "MAC_ADDRESS": OperatorConfig("replace", {"new_value": "REDACTED"}),
         "PHONE_NUMBER": OperatorConfig("replace", {"new_value": "REDACTED"}),
@@ -77,7 +80,7 @@ def scrub_text_field(df: pd.DataFrame, field_name: str) -> pd.DataFrame:
             return text
 
         text = str(text)
-        results = analyzer.analyze(text, language="en")
+        results = analyzer.analyze(text, language="en", entities=ENTITIES_TO_DETECT)
 
         return anonymizer.anonymize(text=text, analyzer_results=results, operators=operators).text
 
@@ -136,7 +139,6 @@ def scrub_supporting_columns(df: pd.DataFrame, text_fields: list[str], exclude_f
         "EMAIL_ADDRESS": OperatorConfig("custom", {"lambda": lambda x: fake.safe_email()}),
         "CREDIT_CARD": OperatorConfig("custom", {"lambda": lambda x: fake.credit_card_number()}),
         "CRYPTO": OperatorConfig("replace", {"new_value": "REDACTED"}),
-        "DATE_TIME": OperatorConfig("replace", {"new_value": "REDACTED"}),
         "IP_ADDRESS": OperatorConfig("replace", {"new_value": "REDACTED"}),
         "MAC_ADDRESS": OperatorConfig("replace", {"new_value": "REDACTED"}),
         "PHONE_NUMBER": OperatorConfig("replace", {"new_value": "REDACTED"}),
@@ -157,7 +159,7 @@ def scrub_supporting_columns(df: pd.DataFrame, text_fields: list[str], exclude_f
     subset = subset.astype(str).astype(object)
     subset[na_mask] = pd.NA
 
-    analysis = PandasAnalysisBuilder().generate_analysis(subset)
+    analysis = PandasAnalysisBuilder().generate_analysis(subset, entity_types=ENTITIES_TO_DETECT)
     anonymized = pandas_engine.anonymize(subset, analysis, operators=operators)
 
     # Write back only the named columns rather than replacing `df` wholesale.
