@@ -159,7 +159,7 @@ def scrub_supporting_columns(df: pd.DataFrame, text_fields: list[str], exclude_f
     subset = subset.astype(str).astype(object)
     subset[na_mask] = pd.NA
 
-    analysis = PandasAnalysisBuilder().generate_analysis(subset, entity_types=ENTITIES_TO_DETECT)
+    analysis = PandasAnalysisBuilder().generate_analysis(subset)
     anonymized = pandas_engine.anonymize(subset, analysis, operators=operators)
 
     # Write back only the named columns rather than replacing `df` wholesale.
